@@ -3,6 +3,6 @@
  */
 export class CreateTodoDto {
   message: string;
-  labelId: string;
+  label: Label;
   dueDate: Date;
 }

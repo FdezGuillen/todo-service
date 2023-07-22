@@ -8,23 +8,24 @@ export class TodoService {
     return this.todoList;
   }
 
-  find(id: string): TODO {
+  findById(id: string): TODO {
     return this.todoList.find((todo: TODO) => todo.id === id);
   }
 
-  create(todo: TODO): string {
+  create(todo: TODO): TODO {
+    todo.id = 'id' + this.todoList.length;
     this.todoList.push(todo);
-    return todo.id;
+    return todo;
   }
 
   update(id: string, todo: TODO): string {
-    const originalTodoIndex: number = this.todoList.indexOf(this.find(id));
+    const originalTodoIndex: number = this.todoList.indexOf(this.findById(id));
     this.todoList[originalTodoIndex] = todo;
     return 'Updated successfully';
   }
 
   delete(id: string): string {
-    const originalTodoIndex: number = this.todoList.indexOf(this.find(id));
+    const originalTodoIndex: number = this.todoList.indexOf(this.findById(id));
     this.todoList.splice(originalTodoIndex, 1);
     return 'Deleted successfully';
   }

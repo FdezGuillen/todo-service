@@ -3,6 +3,6 @@
  */
 export class UpdateTodoDto {
   message: string;
-  labelId: string;
+  label: Label;
   dueDate: Date;
 }
