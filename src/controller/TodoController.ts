@@ -13,11 +13,6 @@ import { UpdateTodoDto } from 'src/dto/UpdateTodoDto';
 
 @Controller('todo')
 export class TodoController {
-  @Post()
-  create(@Body() createTodoDto: CreateTodoDto) {
-    return 'This action adds a new TODO';
-  }
-
   @Get()
   findAll() {
     return `This action returns all TODOs`;
@@ -26,6 +21,11 @@ export class TodoController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return `This action returns a #${id} TODO`;
+  }
+
+  @Post()
+  create(@Body() createTodoDto: CreateTodoDto) {
+    return 'This action adds a new TODO';
   }
 
   @Put(':id')
