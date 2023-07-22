@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { ITodoService } from './ITodoService';
 
 @Injectable()
-export class TodoService {
+export class TodoService implements ITodoService {
   private readonly todoList: TODO[] = [];
 
   findAll(): TODO[] {
