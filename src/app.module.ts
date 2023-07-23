@@ -13,7 +13,7 @@ import { ILabelIntegration } from './integration/ILabelIntegration';
 import { LabelIntegration } from './integration/LabelIntegration';
 
 @Module({
-  imports: [HttpModule, CacheModule.register()],
+  imports: [CacheModule.register(), HttpModule],
   controllers: [AppController, TodoController],
   providers: [
     AppService,

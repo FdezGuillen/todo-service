@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AxiosResponse } from 'axios';
+import { Label } from 'src/types/label';
 
 @Injectable()
 export abstract class ILabelIntegration {

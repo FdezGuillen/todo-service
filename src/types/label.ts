@@ -1,7 +1,7 @@
 /**
  *  Custom label that can be applied to a TODO
  * */
-type Label = {
+export type Label = {
   id: string;
   name?: string;
 };

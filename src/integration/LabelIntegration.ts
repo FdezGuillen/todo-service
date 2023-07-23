@@ -3,6 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
 import { ILabelIntegration } from './ILabelIntegration';
 import { getAllLabelsPath, getLabelByIdPath } from './util/LabelRoutes.const';
+import { Label } from 'src/types/label';
 
 @Injectable()
 export class LabelIntegration implements ILabelIntegration {

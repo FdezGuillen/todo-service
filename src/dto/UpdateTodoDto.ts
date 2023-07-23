@@ -1,3 +1,4 @@
+import { Label } from 'src/types/label';
 /**
  * DTO for TODO update
  */

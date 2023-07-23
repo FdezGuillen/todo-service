@@ -1,7 +1,9 @@
+import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import { ILabelService } from './ILabelService';
 import { ILabelIntegration } from 'src/integration/ILabelIntegration';
+import { Label } from 'src/types/label';
 
 @Injectable()
 export class LabelService implements ILabelService {
@@ -10,28 +12,22 @@ export class LabelService implements ILabelService {
     private readonly labelIntegration: ILabelIntegration,
   ) {}
 
-  /**
-   * Returns a list of all the available labels for use
-   */
-  async findAll(): Promise<Label[]> {
-    try {
-      const labels: Label[] = await this.labelIntegration.getAllLabels();
-      return labels;
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
+  CACHE_TTL_MILLISECONDS = 3600000;
   /**
    * Returns a promise for retrieving a single label found by its id
    * @param id: string
    */
   async findById(id: string): Promise<Label> {
     try {
-      const label: Label = await this.labelIntegration.getLabelById(id);
+      let label: Label = await this.cacheManager.get(id);
+      if (typeof label === 'undefined' || label === null) {
+        label = await this.labelIntegration.getLabelById(id);
+        this.cacheManager.set(id, label, this.CACHE_TTL_MILLISECONDS);
+      }
       return label;
     } catch (error) {
       console.log(error);
+      throw Error(error);
     }
   }
 }

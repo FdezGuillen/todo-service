@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { TODO } from 'src/types/todo';
 
 @Injectable()
 export abstract class ITodoService {
@@ -17,7 +18,7 @@ export abstract class ITodoService {
    * Saves a new TODO task and returns it once it is created
    * @param todo: TODO
    */
-  abstract create(todo: TODO): TODO;
+  abstract create(todo: TODO): Promise<TODO>;
 
   /**
    * Updates an already existing TODO task

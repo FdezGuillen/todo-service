@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ITodoService } from './ITodoService';
 import { ILabelService } from './ILabelService';
+import { TODO } from 'src/types/todo';
+import { Label } from 'src/types/label';
 
 @Injectable()
 export class TodoService implements ITodoService {
@@ -27,8 +29,10 @@ export class TodoService implements ITodoService {
    * Saves a new TODO task and returns it once it is created
    * @param todo: TODO
    */
-  create(todo: TODO): TODO {
+  async create(todo: TODO): Promise<TODO> {
     todo.id = 'id' + this.todoList.length;
+    const label: Label = await this.labelService.findById(todo.label.id);
+    todo.label = label;
     this.todoList.push(todo);
     return todo;
   }
