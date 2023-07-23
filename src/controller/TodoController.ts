@@ -7,8 +7,9 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
-  UsePipes,
   HttpCode,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { GetTodoDto } from 'src/dto/GetTodoDto';
 import { CreateTodoDto } from 'src/dto/CreateTodoDto';
@@ -18,6 +19,12 @@ import { ITodoService } from 'src/service/ITodoService';
 import { JoiValidationPipe } from './util/JoiValidationPipe';
 import { createTodoSchema } from './util/ValidationPipe';
 import { TODO } from 'src/types/todo';
+import {
+  INTERNAL_SERVER_ERROR,
+  LABEL_DOESNT_EXIST_ERROR,
+  LABEL_SERVICE_ERROR,
+  TODO_DOESNT_EXIST_ERROR,
+} from 'src/util/ErrorMessages';
 
 @Controller('todo')
 export class TodoController {
@@ -28,9 +35,16 @@ export class TodoController {
    * @returns GetTodoDto[]
    */
   @Get()
-  async findAll(): Promise<GetTodoDto[]> {
-    const todoList: TODO[] = await this.todoService.findAll();
-    return mapToGetTodoDtoList(todoList);
+  async findAll(): Promise<GetTodoDto[] | string> {
+    try {
+      const todoList: TODO[] = await this.todoService.findAll();
+      return mapToGetTodoDtoList(todoList);
+    } catch (error) {
+      throw new HttpException(
+        INTERNAL_SERVER_ERROR,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   /**
@@ -42,8 +56,18 @@ export class TodoController {
   async findOne(
     @Param('uuid', new ParseUUIDPipe()) id: string,
   ): Promise<GetTodoDto> {
-    const todo: TODO = await this.todoService.findById(id);
-    return mapToGetTodoDto(todo);
+    try {
+      const todo: TODO = await this.todoService.findById(id);
+      return mapToGetTodoDto(todo);
+    } catch (error) {
+      if (error.message === TODO_DOESNT_EXIST_ERROR) {
+        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+      }
+      throw new HttpException(
+        INTERNAL_SERVER_ERROR,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   /**
@@ -55,8 +79,21 @@ export class TodoController {
   async create(
     @Body(new JoiValidationPipe(createTodoSchema)) createTodoDto: CreateTodoDto,
   ) {
-    const createdTodo = await this.todoService.create(createTodoDto);
-    return mapToGetTodoDto(createdTodo);
+    try {
+      const createdTodo = await this.todoService.create(createTodoDto);
+      return mapToGetTodoDto(createdTodo);
+    } catch (error) {
+      const errorMessage: string = error.message;
+      if (errorMessage === LABEL_DOESNT_EXIST_ERROR) {
+        throw new HttpException(errorMessage, HttpStatus.NOT_FOUND);
+      } else if (errorMessage === LABEL_SERVICE_ERROR) {
+        throw new HttpException(errorMessage, HttpStatus.SERVICE_UNAVAILABLE);
+      }
+      throw new HttpException(
+        INTERNAL_SERVER_ERROR,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   /**
@@ -71,8 +108,24 @@ export class TodoController {
     @Param('uuid', new ParseUUIDPipe()) id: string,
     @Body(new JoiValidationPipe(createTodoSchema)) updateTodoDto: UpdateTodoDto,
   ) {
-    await this.todoService.update(id, updateTodoDto);
-    return 'Updated successfully';
+    try {
+      await this.todoService.update(id, updateTodoDto);
+      return 'Updated successfully';
+    } catch (error) {
+      const errorMessage: string = error.message;
+      if (
+        errorMessage === TODO_DOESNT_EXIST_ERROR ||
+        errorMessage === LABEL_DOESNT_EXIST_ERROR
+      ) {
+        throw new HttpException(errorMessage, HttpStatus.NOT_FOUND);
+      } else if (errorMessage === LABEL_SERVICE_ERROR) {
+        throw new HttpException(errorMessage, HttpStatus.SERVICE_UNAVAILABLE);
+      }
+      throw new HttpException(
+        INTERNAL_SERVER_ERROR,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   /**
@@ -83,7 +136,17 @@ export class TodoController {
   @Delete(':uuid')
   @HttpCode(204)
   async remove(@Param('uuid', new ParseUUIDPipe()) id: string) {
-    await this.todoService.delete(id);
-    return 'Deleted successfully';
+    try {
+      await this.todoService.delete(id);
+      return 'Deleted successfully';
+    } catch (error) {
+      if (error.message === TODO_DOESNT_EXIST_ERROR) {
+        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+      }
+      throw new HttpException(
+        INTERNAL_SERVER_ERROR,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

@@ -25,11 +25,11 @@ export abstract class ITodoService {
    * @param id: string - The id of the existing TODO that should be updated
    * @param todo: TODO - The new data for updating the existing TODO
    */
-  abstract update(id: string, todo: TODO): string;
+  abstract update(id: string, todo: TODO): Promise<string>;
 
   /**
    * Deletes an existing TODO task from the database by its id
    * @param id: string
    */
-  abstract delete(id: string): string;
+  abstract delete(id: string): Promise<string>;
 }

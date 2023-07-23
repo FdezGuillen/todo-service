@@ -5,6 +5,7 @@ import { TODO } from 'src/types/todo';
 import { Label } from 'src/types/label';
 import { ITodoRepository } from 'src/repository/ITodoRepository';
 import { TodoModel } from 'src/schema/model/TodoModel.interface';
+import { TODO_DOESNT_EXIST_ERROR } from 'src/util/ErrorMessages';
 
 @Injectable()
 export class TodoService implements ITodoService {
@@ -46,29 +47,39 @@ export class TodoService implements ITodoService {
    * @param id: string - The id of the existing TODO that should be updated
    * @param todo: TODO - The new data for updating the existing TODO
    */
-  update(id: string, todo: TODO): string {
-    this.validateIfTodoExists(id);
-    const todoToUpdate: TodoModel = this.mapToDocument(todo);
-    return this.todoRepository.update(id, todoToUpdate);
+  async update(id: string, todo: TODO): Promise<string> {
+    try {
+      await this.validateIfTodoExists(id);
+      const label: Label = await this.labelService.findById(todo.label.id);
+      todo.label = label;
+      const todoToUpdate: TodoModel = this.mapToDocument(todo);
+      return this.todoRepository.update(id, todoToUpdate);
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Deletes an existing TODO task from the database by its id
    * @param id: string
    */
-  delete(id: string): string {
-    this.validateIfTodoExists(id);
-    return this.todoRepository.delete(id);
+  async delete(id: string): Promise<string> {
+    try {
+      await this.validateIfTodoExists(id);
+      return this.todoRepository.delete(id);
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Checks if a TODO with the provided id exists in the database, if not, it throws an exception
    * @param id - string
    */
-  validateIfTodoExists(id: string) {
-    const originalTodo: TODO = this.findById(id);
+  async validateIfTodoExists(id: string) {
+    const originalTodo: TODO = await this.findById(id);
     if (typeof originalTodo === 'undefined' || originalTodo === null) {
-      throw Error("TODO task doesn't exist");
+      throw new Error(TODO_DOESNT_EXIST_ERROR);
     }
   }
 

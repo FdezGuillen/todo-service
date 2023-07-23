@@ -12,7 +12,12 @@ export const mapToGetTodoDto = (todo: TODO): GetTodoDto => {
   };
 };
 
-export const mapToGetTodoDtoList = (todoList: TODO[]): GetTodoDto[] => {
+export const mapToGetTodoDtoList = (
+  todoList: TODO[],
+): GetTodoDto[] | string => {
+  if (todoList.length === 0) {
+    return '';
+  }
   return todoList.map((todo) => {
     return mapToGetTodoDto(todo);
   });

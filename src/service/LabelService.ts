@@ -26,8 +26,7 @@ export class LabelService implements ILabelService {
       }
       return label;
     } catch (error) {
-      console.log(error);
-      throw Error(error);
+      throw error;
     }
   }
 }
