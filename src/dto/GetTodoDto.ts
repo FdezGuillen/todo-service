@@ -6,5 +6,5 @@ export class GetTodoDto {
   id: string;
   message: string;
   label: Label;
-  dueDate: Date;
+  dueDate: string;
 }

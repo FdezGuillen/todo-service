@@ -61,6 +61,10 @@ export class TodoService implements ITodoService {
     return this.todoRepository.delete(id);
   }
 
+  /**
+   * Checks if a TODO with the provided id exists in the database, if not, it throws an exception
+   * @param id - string
+   */
   validateIfTodoExists(id: string) {
     const originalTodo: TODO = this.findById(id);
     if (typeof originalTodo === 'undefined' || originalTodo === null) {
@@ -68,11 +72,16 @@ export class TodoService implements ITodoService {
     }
   }
 
+  /**
+   * Maps a TODO to an object adequate for database schema operations
+   * @param todo - TODO
+   * @returns TODO in TodoModel format
+   */
   mapToDocument(todo: TODO): TodoModel {
     const dateString: string =
-      typeof todo.dueDate === 'string'
-        ? todo.dueDate
-        : todo.dueDate.toISOString();
+      todo.dueDate instanceof Date
+        ? todo.dueDate.toISOString()
+        : new Date(todo.dueDate).toISOString();
     return {
       message: todo.message,
       label: todo.label,
