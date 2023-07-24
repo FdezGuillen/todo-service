@@ -28,7 +28,15 @@ export class TodoService implements ITodoService {
    * @param id: string
    */
   findById(id: string): TODO {
-    return this.todoRepository.findOne(id);
+    try {
+      const todo: TODO = this.todoRepository.findOne(id);
+      if (typeof todo === 'undefined' || todo === null) {
+        throw new Error(TODO_DOESNT_EXIST_ERROR);
+      }
+      return todo;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -49,7 +57,7 @@ export class TodoService implements ITodoService {
    */
   async update(id: string, todo: TODO): Promise<string> {
     try {
-      await this.validateIfTodoExists(id);
+      await this.findById(id);
       const label: Label = await this.labelService.findById(todo.label.id);
       todo.label = label;
       const todoToUpdate: TodoModel = this.mapToDocument(todo);
@@ -65,21 +73,10 @@ export class TodoService implements ITodoService {
    */
   async delete(id: string): Promise<string> {
     try {
-      await this.validateIfTodoExists(id);
+      await this.findById(id);
       return this.todoRepository.delete(id);
     } catch (error) {
       throw error;
-    }
-  }
-
-  /**
-   * Checks if a TODO with the provided id exists in the database, if not, it throws an exception
-   * @param id - string
-   */
-  async validateIfTodoExists(id: string) {
-    const originalTodo: TODO = await this.findById(id);
-    if (typeof originalTodo === 'undefined' || originalTodo === null) {
-      throw new Error(TODO_DOESNT_EXIST_ERROR);
     }
   }
 

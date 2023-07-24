@@ -36,7 +36,7 @@ import { TodoRepository } from './repository/TodoRepository';
         },
       },
     ]),
-    CacheModule.register(),
+    CacheModule.register({ isGlobal: true }),
     HttpModule,
   ],
   controllers: [AppController, TodoController],
