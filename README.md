@@ -1,73 +1,48 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+TODO API for technical test.
 
-## Installation
+## Setup and launch
+1 - Copy .env file in root directory with variables LABEL_SERVICE_EXTERNAL_PATH, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_REGION (ask the creator)
 
+2- Run command
 ```bash
-$ npm install
+$ docker-compose up
 ```
-
-## Running the app
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
+3- Send HTTP requests to localhost:3000
 
 ## Test
 
 ```bash
 # unit tests
 $ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
 
-## Support
+## API
+Pending of refining a proper Swagger documentation following OpenAPI specification. For now, these are the available endpoints:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+GET /todo -> List of all TODO tasks in the database
+GET /todo/{id} -> Returns the TODO whose id matches with the provided one (uuid format)
+POST /todo -> Creates a TODO. Body must comply with the following format:
+```bash
+{
+    "message": "TODO message", # required, min length 3, max length 500
+    "label": {
+        "id": "Label id" # required
+    },
+    "dueDate": "2023-12-31T00:00:00Z" # required, ISO-8601 valid format
+}
+```
+UPDATE /todo/{id} -> Updates the TODO whose id matches with the provided one (uuid format). Accepts same body as POST
+DELETE /todo/{id} -> Deletes the TODO whose id matches with the provided one (uuid format)
 
-## Stay in touch
+## Main decissions taken
+- The Controller-Service-Repository pattern was chosen for this project due to its simplicity in separating concerns. Additionally, the requests to the third party Label service are managed in LabelIntegration, which can be injected in any service.
+- One of the proposed problems was the instability of the Label service, which can return an error or response times. The proposed solution is having an in-memory cache for labels that is updated when the user tries to use a label that it's not saved in cache. Note that the TTL for each of this label in cache is around 1 hour. In the case there is no label in cache and the http request fails, a 503 error is returned. However, more solutions to these problems could be researched further.
+- Technologies implemented are the Nestjs framework (because of its utilities for building a backend service) and a cloud DynamoDB managed with dynamoose. Nevertheless, technologies would usually be decided after a proper research and team discussions.
+- Secrets are provided by an .env file to keep it simple since this is a technical test, but in a real work environment these secrets should be encrypted, replaced, managed, etc.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+## Problems
+- For the update operation, PUT verb was implemented instead of PATCH in order to not deal with different partial bodies, but in a real project this decision could be different
+- UUIDs had to be generated manually before inserting with Node.js' built in crypto package
+- Defining custom types for TODO and Label worked when launching the service, but Visual Studio couldn't interpret them while debugging. I couldn't find a solution, hence why you can see the types being exported.
